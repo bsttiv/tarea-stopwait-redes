@@ -153,12 +153,19 @@ class SocketTCP:
     def recv(self, buff_size: int):
         if not self.established: return
         if self.received_bytes == 0:
-            raw_body, addr = self.socket.recvfrom(20)
-            segment = self.parse_segment(raw_body)
-            message_length = int.from_bytes(segment.data, byteorder='big')
-            new_segment = TCPSegment(ACK, segment.seq + 4, b'')
-            raw_segment = self.create_segment(new_segment)
-            self.socket.sendto(raw_segment, addr)
+            while True:
+                raw_body, addr = self.socket.recvfrom(20)
+                segment = self.parse_segment(raw_body)
+                if segment.seq == self.num:
+                    message_length = int.from_bytes(segment.data, byteorder='big')
+                    new_segment = TCPSegment(ACK, segment.seq + 4, b'')
+                    raw_segment = self.create_segment(new_segment)
+                    self.socket.sendto(raw_segment, addr)
+                    break
+                else:
+                    new_segment = TCPSegment(ACK, self.num, b'')
+                    raw_segment = self.create_segment(new_segment)
+                    self.socket.sendto(raw_segment, addr)
             min_bytes = min(message_length, buff_size)
             buffer = b""
             while len(buffer) < min_bytes:
