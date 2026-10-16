@@ -19,7 +19,7 @@ server_socketTCP = SocketTCP()
 server_socketTCP.bind(address)
 print(f"[Servidor] Escuchando en {address}...")
 connection_socketTCP, new_address = server_socketTCP.accept()
-print(f"[Servidor] Conexion aceptada desde {new_address}")
+print(f"[Servidor] Conexion aceptada desde {connection_socketTCP.dest}, atendida en el nuevo socket {new_address}")
 
 resultados = []
 for n in valores_n:
